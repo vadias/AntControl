@@ -25,27 +25,34 @@ namespace AntControl
         bool connect;
         private int numPorts;
 
-        public string[] baud = { "4800", "9600", "19200", "38400", "57600", "115 200"};
+        public string[] baud = { "4800", "9600", "19200", "38400", "57600", "115200"};
         public int baud_num;
+        /* Скорость по умолчанию 9600 */
+        int baud_curr = 1; 
 
         public ConnectWindow(SerialPort serial)
         {
             InitializeComponent();
             Serial = serial;
             string[] ports = SerialPort.GetPortNames();
-            int numBauds = 0;
-
+            int numBauds = 0;  
+            /* Опрос всех портов */
             foreach (string port in ports)
             {
                 COMComboBox.ItemsSource = ports;
                 numPorts++;
             }
+            /* По умолчанию первый свободный порт */
+            COMComboBox.Text = ports[0];
 
+            /* Опрос всех скоростей */
             foreach (string i in baud)
             {
                 BaudComboBox.Items.Add(baud[numBauds]);
                 numBauds++;
             }
+            /* Установка скорости по умолчанию */
+            BaudComboBox.SelectedIndex = baud_curr;
         }
 
         
@@ -53,18 +60,17 @@ namespace AntControl
         {
             
         }
+
+        /* Выбор скрости порта  */
         private void BaudComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         { 
             BaudComboBox.Text = baud[BaudComboBox.SelectedIndex];           // Вывод скрости порта
-
         }
         // Установка соединения через клик
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
             if (connect == false)
             {
-                if (!(COMComboBox.Text == null))
-                {
                     Serial.PortName = COMComboBox.Text;
                     Serial.Handshake = System.IO.Ports.Handshake.None;
                     Serial.BaudRate = int.Parse(baud[BaudComboBox.SelectedIndex]);  // Установка скорости порта через преобразование типов
@@ -76,7 +82,6 @@ namespace AntControl
                     Serial.Open();
                     connect = true;
                     ButConnect.Content = "Разсоед";
-                }
             }
             else
             {
