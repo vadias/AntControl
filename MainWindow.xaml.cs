@@ -28,7 +28,9 @@ namespace AntControl
         public SerialPort Serial;
         bool connect;
         public int numPorts = 0;
+        /* Буффер принятых данных */
         byte[] rx_data = new byte[256];
+        /* Буффер переданных данных */
         byte[] tx_data = new byte[256];
 
         public mainWindow()
@@ -56,9 +58,7 @@ namespace AntControl
             Serial.Write("R");
         }
         private void AzimutSet_Click(object sender, RoutedEventArgs e)
-        {
-            
-            
+        {      
             int azimut = int.Parse(AzimutEnter.Text);   // Преобразование строки в число
 
             if (azimut < 361 && azimut > -1)
@@ -133,25 +133,36 @@ namespace AntControl
            // rx_data[5] = (byte)Serial.ReadByte();
             Serial.DiscardInBuffer();
             //Dispatcher.Invoke(DispatcherPriority.Background, new Delegate(WriteData), recieved_data);
-            Azimut.Dispatcher.Invoke(() =>
+            /*  Azimut.Dispatcher.Invoke(() =>
+              {
+                  WriteDataAsync(rx_data);
+              });
+            */
+            Dispatcher.Invoke(() =>
             {
                 WriteDataAsync(rx_data);
             });
-
+               
         }
 
+        /*Обработка принятого пакета */
         private async Task WriteDataAsync(byte[] rx)
         {
             int deg = ((rx[0] << 8) + rx[1] >> 4);
             Azimut.Text = "" + (deg / (4095 / 360));
             double angel = Math.PI * (deg / (4095/360));
-            LineAzimut.X1 = 200+ 100*Math.Cos(angel/180);
-            LineAzimut.Y1 = 300+ 100*Math.Sin(angel/180);
+            LineAzimut.X1 = 200+ 150*Math.Cos(angel/180);
+            LineAzimut.Y1 = 330+ 150*Math.Sin(angel/180);
         }
 
         private void Enter_Click(object sender, RoutedEventArgs e)
         {
+            Serial.Write("E");
+        }
 
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            Serial.Write("R");
         }
     }
 
